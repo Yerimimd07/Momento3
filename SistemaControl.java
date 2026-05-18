@@ -8,41 +8,53 @@ public class SistemaControl {
  
     // Constructor con argumentos
     public SistemaControl(int totalPisos) {
-        this.ascensor          = new Ascensor(totalPisos);
-        this.pisos             = new Piso[totalPisos];
-        this.solicitudes       = new int[totalPisos];
-        this.totalSolicitudes  = 0;
+        this.ascensor         = new Ascensor(totalPisos);
+        this.pisos            = new Piso[totalPisos];
+        this.solicitudes      = new int[totalPisos];
+        this.totalSolicitudes = 0;
  
         for (int i = 0; i < totalPisos; i++) {
-            pisos[i] = new Piso(i + 1);
+            pisos[i] = new Piso(i + 1, totalPisos); // totalPisos define qué botones crear
         }
  
+        System.out.println("================================================");
         System.out.println("   SISTEMA DE CONTROL DE ASCENSOR INICIADO");
         System.out.println("   Total de pisos: " + totalPisos);
-
+        System.out.println("================================================\n");
     }
  
     // -------------------------------------------------------
-    //  BOTONES 
+    //  BOTONES - Polimorfismo en acción
     // -------------------------------------------------------
  
     /**
-     * Presiona el botón externo de un piso (llama al ascensor).
-     * Se invoca BotonPiso.presionar() que sobreescribe Boton.presionar().
+     * Presiona el botón de un piso según la dirección indicada.
+     * Valida que esa dirección exista en ese piso.
+     * Polimorfismo: BotonPiso.presionar() sobreescribe Boton.presionar().
      */
-    public void presionarBotonPiso(int numeroPiso) {
+    public void presionarBotonPiso(int numeroPiso, String direccion) {
         if (numeroPiso < 1 || numeroPiso > pisos.length) {
             System.out.println("[SISTEMA] El piso " + numeroPiso + " no existe.");
             return;
         }
-        BotonPiso boton = pisos[numeroPiso - 1].getBoton();
-        boton.presionar();          // BotonPiso sobreescribe Boton
+ 
+        BotonPiso boton = pisos[numeroPiso - 1].getBoton(direccion);
+ 
+        if (boton == null) {
+            System.out.println("[SISTEMA] El piso " + numeroPiso
+                    + " no tiene botón de dirección " + direccion + ".");
+            System.out.println("[SISTEMA] Recuerda: piso 1 solo tiene SUBIR, "
+                    + "piso " + pisos.length + " solo tiene BAJAR.");
+            return;
+        }
+ 
+        boton.presionar();              // Polimorfismo: BotonPiso sobreescribe Boton
         registrarSolicitud(numeroPiso);
     }
  
     /**
      * Presiona un botón interno del ascensor (selecciona destino).
-     * Se invoca BotonAscensor.presionar() que sobreescribe Boton.presionar().
+     * Polimorfismo: BotonAscensor.presionar() sobreescribe Boton.presionar().
      */
     public void presionarBotonAscensor(int pisoDestino) {
         if (pisoDestino < 1 || pisoDestino > ascensor.getBotones().length) {
@@ -50,7 +62,7 @@ public class SistemaControl {
             return;
         }
         BotonAscensor boton = ascensor.getBotones()[pisoDestino - 1];
-        boton.presionar();          // BotonAscensor sobreescribe Boton
+        boton.presionar();              // Polimorfismo: BotonAscensor sobreescribe Boton
         registrarSolicitud(pisoDestino);
     }
  
@@ -58,9 +70,6 @@ public class SistemaControl {
     //  SOLICITUDES
     // -------------------------------------------------------
  
-    /**
-     * Registra una solicitud en el arreglo si no está duplicada.
-     */
     public void registrarSolicitud(int piso) {
         for (int i = 0; i < totalSolicitudes; i++) {
             if (solicitudes[i] == piso) {
@@ -73,9 +82,6 @@ public class SistemaControl {
         System.out.println("[SISTEMA] Solicitud registrada: piso " + piso + ".");
     }
  
-    /**
-     * Elimina la primera solicitud del arreglo (cola FIFO básica).
-     */
     private void eliminarPrimeraSolicitud() {
         for (int i = 0; i < totalSolicitudes - 1; i++) {
             solicitudes[i] = solicitudes[i + 1];
@@ -83,9 +89,6 @@ public class SistemaControl {
         totalSolicitudes--;
     }
  
-    /**
-     * Procesa todas las solicitudes en orden.
-     */
     public void procesarSolicitudes() {
         if (totalSolicitudes == 0) {
             System.out.println("[SISTEMA] No hay solicitudes pendientes.");
@@ -104,9 +107,6 @@ public class SistemaControl {
     //  MOVIMIENTO
     // -------------------------------------------------------
  
-    /**
-     * Mueve el ascensor desde su posición actual hasta el piso destino.
-     */
     public void moverAscensor(int pisoDestino) {
         int pisoActual = ascensor.getPisoActual();
         System.out.println("\n[SISTEMA] Moviendo ascensor al piso " + pisoDestino + "...");
@@ -137,25 +137,17 @@ public class SistemaControl {
     }
  
     // -------------------------------------------------------
-    //  PUERTAS 
+    //  PUERTAS - Polimorfismo en acción
     // -------------------------------------------------------
  
-    /**
-     * Abre la puerta del ascensor y la del piso.
-     * PuertaAscensor.abrir() y PuertaPiso.abrir()
-     * sobreescriben Puerta.abrir().
-     */
     private void abrirPuertas(int numeroPiso) {
-        ascensor.getPuerta().abrir();              // PuertaAscensor sobreescribe Puerta
-        pisos[numeroPiso - 1].getPuerta().abrir(); // PuertaPiso sobreescribe Puerta
+        ascensor.getPuerta().abrir();               // PuertaAscensor sobreescribe Puerta
+        pisos[numeroPiso - 1].getPuerta().abrir();  // PuertaPiso sobreescribe Puerta
     }
  
-    /**
-     * Cierra la puerta del ascensor y la del piso.
-     */
     private void cerrarPuertas(int numeroPiso) {
-        ascensor.getPuerta().cerrar();              // PuertaAscensor sobreescribe Puerta
-        pisos[numeroPiso - 1].getPuerta().cerrar(); // PuertaPiso sobreescribe Puerta
+        ascensor.getPuerta().cerrar();               // PuertaAscensor sobreescribe Puerta
+        pisos[numeroPiso - 1].getPuerta().cerrar();  // PuertaPiso sobreescribe Puerta
     }
  
     // -------------------------------------------------------
@@ -187,7 +179,6 @@ public class SistemaControl {
     public Ascensor getAscensor() { return ascensor; }
     public Piso[]   getPisos()    { return pisos; }
  
-    // Pausa para simular tiempo de viaje
     private void pausa() {
         try { Thread.sleep(400); }
         catch (InterruptedException e) { System.out.println("[SISTEMA] Pausa interrumpida."); }

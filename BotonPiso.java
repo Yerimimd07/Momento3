@@ -1,32 +1,39 @@
 public class BotonPiso extends Boton {
  
-    // Atributo privado - Encapsulamiento
-    private int numeroPiso;
+    // Atributos privados - Encapsulamiento
+    private int    numeroPiso;
+    private String direccion;   // "SUBIR" o "BAJAR"
  
     // Constructor con argumentos
-    public BotonPiso(int numeroPiso) {
-        super(false);              // Llama al constructor de Boton
+    public BotonPiso(int numeroPiso, String direccion) {
+        super(false);
         this.numeroPiso = numeroPiso;
+        this.direccion  = direccion;
     }
  
     /**
      * Sobreescritura del método presionar().
-     * Polimorfismo: comportamiento específico para BotonPiso.
+     * Comportamiento específico para BotonPiso.
      */
     @Override
     public void presionar() {
         setPresionado(true);
-        System.out.println("[BOTON PISO] Botón del piso " + numeroPiso
-                + " presionado. Llamando al ascensor...");
+        System.out.println("[BOTON PISO] Botón " + direccion
+                + " del piso " + numeroPiso + " presionado. Llamando al ascensor...");
     }
  
-    // Getter - Encapsulamiento
+    // Getters - Encapsulamiento
     public int getNumeroPiso() {
         return numeroPiso;
     }
  
+    public String getDireccion() {
+        return direccion;
+    }
+ 
     @Override
     public String toString() {
-        return "BotonPiso [piso=" + numeroPiso + ", presionado=" + estaPresionado() + "]";
+        return "BotonPiso [piso=" + numeroPiso + ", direccion=" + direccion
+                + ", presionado=" + estaPresionado() + "]";
     }
 }
